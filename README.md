@@ -1,79 +1,80 @@
-# Robot programming HKA WS 2024
+# Robot Programming HKA WS 2024 Stacking by Size
 
-This repository contains the code for the robot programming course (the policy learning part) at the University of Applied Sciences Karlsruhe.
+This repository contains the code for the robot programming course at the University of Applied Sciences Karlsruhe. The project focuses on training a model using imitation learning to control a robotic arm in a PyBullet environment. The imitation learning started as a behavior cloning model, with plans to improve it by introducing DAgger in the mix. The goal is to stack objects of varying sizes and colors in descending order, starting with the largest.
 
-We will use and update this repository throughout the course. Hello.
+---
+## Quick Start
 
-## Quick start
+### Environment Setup
 
-### Environment setup
+#### Requirements:
+- Docker (including post-installation steps)
+- TensorFlow (for training and running the model)
+- NVIDIA GPU (recommended for training acceleration)
 
-**Requirements:** have docker installed including the post-installation steps.
+#### GPU Considerations:
+- The default setup supports NVIDIA GPUs.
+- If you do **not** have an NVIDIA GPU, modify `build_image.sh`:
+  - Set the `render` argument to `base`.
+  - Remove the `--gpus all` flag from the `docker run` command in `run_container.sh`.
 
-**Note:** The default settings are for nvidia GPU support. If you don't have an nvidia GPU, open up `build_image.sh` and set the `render` argument to `base`. Also, remove the `--gpus all` flag from the `docker run` command in `run_container.sh`.
-
-Build the docker image with
-
+#### Build and Run the Container:
 ```bash
 ./build_image.sh
-```
-
-Run the container with
-```bash
 ./run_container.sh
 ```
 
-Check whether you can open a window from the container by running
-```bash
-python3 stack_cubes.py
-```
-To test the tensorflow functionality:
-Check whether you can open a window from the container by running
-```bash
-python3 test_model.py
-```
+## Running a Pre-trained Model
 
-To create a new dataset with random positions, run:
-```bash
-python3 auto_create_dataset.py
-```
+Once inside the container, navigate to the `src` folder:
 
-To create a new dataset with random positions and orientations, run:
-```bash
-python3 auto_create_dataset_orientations.py
-```
+- Run `demo_orientation.py` to test a model trained to stack objects using **both** the position and the orientation of the end-effector and the objects.
+- Run `demo_pos.py` to test a model trained to stack objects using **only** the position values.
 
-To create a new dataset with random positions with noise, run:
-```bash
-python3 auto_noise_create_dataset.py
-```
+![Model Stacking Tower](readme_assests/robot_stacking.gif)
 
-Combine the future state in the last state file:
-```bash
-python3 combine_json.py
-```
+---
+## Project Overview
 
-Train the model with only regression:
-```bash
-python3 train_model.py
-```
+The repository consists of multiple folders covering different stages of training a model that enables a robotic arm to stack objects correctly. 
 
-Train the model with regression for position and orientation and classification for gripper:
-```bash
-python3 train_model_binary.py
-```
+The project follows these steps:
+1. **Generate Demonstrations** – Collect expert demonstrations of correct stacking actions, introducing variations and noise for dataset diversity.
+2. **Train a Model** – Use behavior cloning with supervised learning.
+3. **Evaluate Performance** – Run trained models in simulation and collect success/failure metrics.
+4. **Explore DAgger** – Test Dataset Aggregation (DAgger) to refine model performance, though initial trials worsened results.
 
-Train the model with regression for position and orientation and classification for gripper. Modified for testing different networks:
-```bash
-python3 train_model_binary_mod.py
-```
+## Training Your Own Model
 
-Test the model in the enviromment:
-```bash
-python3 env_test_model.py
-```
-To train with dagger:
-```bash
-python3 model_largest_cube_DAgger.py
-```
-DAgger_env.py has many functions to use the different scripts. They include the functions to use the model, the expert definition and some enviroment.
+### 1. Generate Demonstrations
+The `src/dataset_creation` folder contains scripts to create diverse training datasets. The scripts save a file, per action taken. The stacking process of a cube follows six discrete actions:
+1. `move_to_pre_grasp`
+2. `move_to_grasp`
+3. `lift_cube`
+4. `move_to_stack_position`
+5. `stack_cube`
+6. `above_stack`
+7. `return_home`
+
+There are multiple files to create dataset with different characteristics:
+- `create_dataset_pos.py` – Generates demonstrations with random cube placements.
+- `pos_ori_noise_dataset_pos_ori.py` – Introduces noise in the end-effector's position and orientation.
+
+### 2. Prepare the Dataset
+Run `combine_json.py` to structure the dataset. It appends the next environment state as the expected action for training. This is necessary, since the next state of every action, is the desired action, which is later used as the label/ground truth to train the model with supervised learning.
+
+### 3. Train the Model
+Move the dataset to the `training` folder and use the appropriate script:
+- `train_model_pos.py` – Trains a model considering only position.
+- `train_model_ori.py` – Trains a model considering both position and orientation.
+
+This generates a `.keras` file containing the trained model and its corresponding scalers.
+
+## Model Evaluation
+The `evaluation` folder contains scripts to test model performance by running 100 stacking trials and saving the results in a CSV file. Use the plotting scripts in `src/evaluation` to visualize results.
+
+## DAgger Training
+To use **DAgger**, a pre-trained base model is required. The DAgger process runs a simulation where the model continuously stacks cubes, using the expert actions when its predictions deviate significantly. The dataset grows iteratively, retraining the model every few iterations. The DAgger implementation is in `src/DAgger`.
+
+---
+
