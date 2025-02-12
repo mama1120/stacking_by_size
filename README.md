@@ -31,7 +31,7 @@ Once inside the container, navigate to the `src` folder:
 - Run `demo_orientation.py` to test a model trained to stack objects using **both** the position and the orientation of the end-effector and the objects.
 - Run `demo_pos.py` to test a model trained to stack objects using **only** the position values.
 
-![Model Stacking Tower](readme_assests/robot_stacking.gif)
+![Model Stacking Tower](readme_assets/robot_stacking.gif)
 
 ---
 ## Project Overview
