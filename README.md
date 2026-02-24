@@ -1,6 +1,6 @@
-# Robot Programming HKA WS 2024 Stacking by Size
+# Imitation Learning Robot: Stacking by Size
 
-This repository contains the code for the robot programming course at the University of Applied Sciences Karlsruhe. The project focuses on training a model using imitation learning to control a robotic arm in a PyBullet environment. The imitation learning started as a behavior cloning model, with plans to improve it by introducing DAgger in the mix. The goal is to stack objects of varying sizes and colors in descending order, starting with the largest.
+This project focuses on training a model using imitation learning to control a robotic arm in a PyBullet environment. The imitation learning started as a behavior cloning model, with plans to improve it by introducing DAgger in the mix. The goal is to stack objects of varying sizes and colors in descending order, starting with the largest.
 
 ---
 ## Quick Start
